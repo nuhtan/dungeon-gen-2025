@@ -11,4 +11,4 @@ This image seems like a reasonable example what what we are going for.
 - Have a chance that a second entrance to a hallway will be created, this should connect within the first 3 straights of the hallway.
 - Have a chance that an additional hallway that doesn't lead to a room gets created, this should have a limited number of straight available.
 - Have a chance that a hallway will have an additional straight that will connect it to a seperate hallway.
-- Chance for a straight to not go directly to the target and to end early and turn a small amount.
+

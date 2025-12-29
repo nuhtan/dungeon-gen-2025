@@ -54,36 +54,55 @@ impl PreDungeon {
     ) {
         let mut rng = rand::rng();
         let room_count = rng.random_range(min_rooms..max_rooms);
-        for i in 0..room_count {
-            for c in 0..retries_per_room {
+        for _ in 0..room_count {
+            for _ in 0..retries_per_room {
                 let new_room = Room {
                     loc: PreDungeon::pick_point(0, self.length - 1, 0, self.height - 1, &mut rng),
                     length: rng.random_range(min_room_side_length..max_room_side_length),
                     height: rng.random_range(min_room_side_length..max_room_side_length),
                 };
-                println!(
-                    "Loc: {},{}|height: {}|length: {}",
-                    new_room.loc.x, new_room.loc.y, new_room.height, new_room.length
-                );
+                //println!(
+                //    "Loc: {},{}|height: {}|length: {}",
+                //    new_room.loc.x, new_room.loc.y, new_room.height, new_room.length
+                //);
                 if self.check_potantial_room(&new_room) {
                     self.rooms.push(new_room);
+                    break;
                 }
-                println!("Failed to place new room, attempt: {}", c + 1);
+                //println!("Failed to place new room, attempt: {}", c + 1);
             }
         }
     }
 
     fn check_potantial_room(&self, new_room: &Room) -> bool {
-        if self.rooms.len() == 0 {
+        let space = 3;
+        if self.rooms.len() == 0
+            && new_room.loc.x + new_room.length + space < self.length - 1
+            && new_room.loc.y + new_room.height + space < self.height - 1
+        {
             return true;
         }
         for room in &self.rooms {
-            if room.loc.x < new_room.loc.x + new_room.length + 2
-                && room.loc.x + room.length + 2 > new_room.loc.x
-                && room.loc.y < new_room.loc.y + new_room.height + 2
-                && room.loc.y + room.height + 2 > new_room.loc.y
-                && room.loc.x + room.length + 2 < self.length
-                && room.loc.y + room.height + 2 < self.height
+            let l1 = Coord {
+                x: room.loc.x,
+                y: room.loc.y + room.height,
+            };
+            let r1 = Coord {
+                x: room.loc.x + room.length,
+                y: room.loc.y,
+            };
+            let l2 = Coord {
+                x: new_room.loc.x,
+                y: new_room.loc.y + new_room.height,
+            };
+            let r2 = Coord {
+                x: new_room.loc.x + new_room.length,
+                y: new_room.loc.y,
+            };
+            if (l1.x > r2.x + space || l2.x + space > r1.x)
+                && (r1.y > l2.y + space || r2.y + space > l1.y)
+                && (new_room.loc.x + new_room.length + space < self.length - 1
+                    && new_room.loc.y + new_room.height + space < self.height - 1)
             {
                 return true;
             }
@@ -96,6 +115,10 @@ impl PreDungeon {
     pub fn render_to_dungeon(&self) -> Dungeon {
         let mut tiles = vec![vec![Tile::Wall; self.height as usize]; self.length as usize];
         for room in &self.rooms {
+            println!(
+                "Loc: {},{} | height: {} | length: {}",
+                room.loc.x, room.loc.y, room.height, room.length
+            );
             for x in room.loc.x..room.loc.x + room.length {
                 for y in room.loc.y..room.loc.y + room.height {
                     tiles[x as usize][y as usize] = Tile::Room;
